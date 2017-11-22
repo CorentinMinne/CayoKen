@@ -17,6 +17,15 @@ sol.image = pygame.image.load("sol.png").convert_alpha()
 sol.rect = sol.image.get_rect()
 sol.mask = pygame.mask.from_surface(sol.image)
 
+cote_r = pygame.sprite.Sprite()
+cote_r.image = pygame.image.load("cote_r.png").convert_alpha()
+cote_r.rect = cote_r.image.get_rect()
+cote_r.mask = pygame.mask.from_surface(cote_r.image)
+
+cote_l = pygame.sprite.Sprite()
+cote_l.image = pygame.image.load("cote_l.png").convert_alpha()
+cote_l.rect = cote_l.image.get_rect()
+cote_l.mask = pygame.mask.from_surface(cote_l.image)
 
 fond = pygame.sprite.Sprite()
 fond.image = pygame.image.load("fond.png").convert_alpha()
@@ -94,8 +103,10 @@ class anim(pygame.sprite.Sprite):
 images = load_images(path='temp')  # Make sure to provide the relative or full path to the images directory.
 player = anim(position=(100, 0), images=images)
 jump = False
+falling = False
 time = 0
 want_jump = False
+ap_l, ap_r = False, False
 
 while not done:
 
@@ -106,9 +117,11 @@ while not done:
         elif event.type == KEYDOWN:
             if event.key == K_RIGHT:
                player.vx = player.velocityx
+               ap_r = True
             elif event.key == K_LEFT:
                 player.vx = -player.velocityx
-            elif event.key == K_UP and jump == False:
+                ap_l = True
+            elif event.key == K_UP and jump == False and falling == False:
                 jump = True
                 want_jump = True
                 player.vy = 2.5
@@ -116,31 +129,48 @@ while not done:
         elif event.type == KEYUP:
             if event.key == K_RIGHT or event.key == K_LEFT:
                 player.vx = 0
-    
+                ap_l = False
+                ap_r = False
+    if pygame.sprite.collide_mask(cote_r, player.test):
+        if player.vx < 0:
+            player.vx = 0
+    elif ap_l == True:
+        player.vx = -player.velocityx
+        
+
+    if pygame.sprite.collide_mask(cote_l, player.test):
+        if player.vx > 0:
+            player.vx = 0
+    elif ap_r == True:
+        player.vx = player.velocityx
+
     if pygame.sprite.collide_mask(fond, player.test):
         if jump == True:
-            player.vy = 0
+            player.vy = -1
+            falling = True
             jump = False
-        player.velocityy -= 1.8 * 1/60
+    
+    if falling == True:        
+        player.velocityy -= 1.0 * 1/60
         player.velocityy += player.vy
         player.test.rect.y -= player.vy
 
     if pygame.sprite.collide_mask(sol, player.test):
         if jump == True and want_jump == False:
             jump = False
+        falling= False
         time = 0
         if want_jump == False:
             player.vy = 0
         player.test.rect.y = player.test.rect.y
         
     elif jump == False:
-        print ("RIEN")
         player.vy -= 1.8 * 1/60
         player.velocityy += player.vy
         player.test.rect.y -= player.vy
       
-        
-    if jump == True: # SI LE JOUEUR EST EN TRAIN DE SAUTER
+    print (falling, jump)  
+    if jump == True and falling == False: # SI LE JOUEUR EST EN TRAIN DE SAUTER
         player.vy -= 1.8 * 1/60
         player.velocityy += player.vy
         player.test.rect.y -= player.vy

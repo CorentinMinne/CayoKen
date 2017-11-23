@@ -168,11 +168,13 @@ while not done:
                 player.vy = 2.5
 
         elif event.type == KEYUP:
-            if event.key == K_RIGHT or event.key == K_LEFT:
+            if event.key == K_RIGHT:
+                ap_r = False
+            if event.key == K_LEFT:
+                ap_l = False
+            if ap_l == ap_r == False:
                 player.vx = 0
                 move_decor = 0
-                ap_l = False
-                ap_r = False
 
 
     player.check_collision()
@@ -188,7 +190,7 @@ while not done:
         player.sprite.rect.y -= player.vy
         time += 1
 
-    if time > 0:
+    if time >= 0:
         want_jump = False
 
     for decor in groupe.sprites():

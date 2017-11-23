@@ -198,7 +198,7 @@ while not done:
     #fenetre.blit(sol.image, (0,0))
     #fenetre.blit(fond.image, (0,0))
     groupe.update()
-    #groupe.draw(fenetre)
+    groupe.draw(fenetre)
     fenetre.blit(player.test.image, player.test.rect)
     pygame.display.flip()
 

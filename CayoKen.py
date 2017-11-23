@@ -8,7 +8,12 @@ pygame.init()
 fenetre = pygame.display.set_mode((640, 480), RESIZABLE)
 pygame.display.set_caption("Cayo Ken")
 clock = pygame.time.Clock()
-
+jump = False
+falling = False
+time = 0
+want_jump = False
+ap_l, ap_r = False, False
+move_decor = 0
 
 ciel = pygame.image.load("cuiel").convert_alpha()
 
@@ -77,10 +82,7 @@ class anim(pygame.sprite.Sprite):
         self.current_frame = 0
 
     def update_frame_dependent(self, dt):
-        """
-        Updates the image of Sprite every 6 frame (approximately every 0.1 second if frame rate is 60).
-        """
-        if self.vx > 0:  # Use the right images if sprite is moving right.
+        if self.vx > 0:
             self.images = self.images_right
             self.image_jump = self.image_jump_r
         elif self.vx < 0:
@@ -88,6 +90,7 @@ class anim(pygame.sprite.Sprite):
             self.image_jump = self.image_jump_l
 
         self.current_time += dt
+
         if self.vx == 0 and self.vy == 0 and self.current_time >= self.animation_time:
             self.current_time = 0
             self.index = 0
@@ -106,14 +109,42 @@ class anim(pygame.sprite.Sprite):
     def update(self, dt):
         self.update_frame_dependent(dt)
 
+    def check_collision(self):
+        global jump, move_decor, ap_r, ap_l, cote_r, cote_l, fond, sol, want_jump, falling
+
+        col_right = pygame.sprite.collide_mask(cote_r, self.sprite)
+        col_left = pygame.sprite.collide_mask(cote_l, self.sprite)
+        col_sol = pygame.sprite.collide_mask(sol, self.sprite)
+        col_plat = pygame.sprite.collide_mask(fond, self.sprite)
+
+        if col_right:
+            if self.vx < 0:
+                move_decor = 0
+
+        elif col_left:
+            if self.vx > 0:
+                move_decor = 0
+
+        elif col_plat:
+            if jump == True:
+                self.vy = -1
+                falling = True
+                jump = False
+
+        elif col_sol:
+            if jump == True and want_jump == False:
+                jump = False
+            falling = False
+            time = 0
+            if want_jump == False:
+                self.vy = 0
+            self.sprite.rect.y = self.sprite.rect.y
+
+        if col_sol == col_plat == col_left == col_right == None:
+            falling = True
+
 images = load_images(path='temp')  # Make sure to provide the relative or full path to the images directory.
-player = anim(position=(640/2, 480/2), images=images)
-jump = False
-falling = False
-time = 0
-want_jump = False
-ap_l, ap_r = False, False
-move_decor = 0
+player = anim(position=(640/2, 100), images=images)
 
 while not done:
 
@@ -144,50 +175,20 @@ while not done:
                 ap_r = False
 
 
-    if pygame.sprite.collide_mask(cote_r, player.sprite):
-        if player.vx < 0:
-            move_decor = 0
-    elif ap_l == True:
-        move_decor = 2
-
-    if pygame.sprite.collide_mask(cote_l, player.sprite):
-        if player.vx > 0:
-            move_decor = 0
-    elif ap_r == True:
-        move_decor = -2
-
-    if pygame.sprite.collide_mask(fond, player.sprite):
-        if jump == True:
-            player.vy = -1
-            falling = True
-            jump = False
+    player.check_collision()
 
     if falling == True:
-        player.velocityy -= 30 * 1/60
+        player.vy -= 2 * 1/60
         player.velocityy += player.vy
         player.sprite.rect.y -= player.vy
 
-    if pygame.sprite.collide_mask(sol, player.sprite):
-        if jump == True and want_jump == False:
-            jump = False
-        falling= False
-        time = 0
-        if want_jump == False:
-            player.vy = 0
-        player.sprite.rect.y = player.sprite.rect.y
-
-    elif jump == False:
-        player.vy -= 1.8 * 1/60
-        player.velocityy += player.vy
-        player.sprite.rect.y -= player.vy
-
-    if jump == True and falling == False: # SI LE JOUEUR EST EN TRAIN DE SAUTER
+    if jump == True and falling == False:
         player.vy -= 1.8 * 1/60
         player.velocityy += player.vy
         player.sprite.rect.y -= player.vy
         time += 1
 
-    if time > 5:
+    if time > 0:
         want_jump = False
 
     for decor in groupe.sprites():

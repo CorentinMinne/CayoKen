@@ -78,8 +78,7 @@ class anim(pygame.sprite.Sprite):
         self.animation_time = 0.05
         self.current_time = 0
 
-        self.animation_frames = 6
-        self.current_frame = 0
+        self.on_ground = False
 
     def update_frame_dependent(self, dt):
         if self.vx > 0:
@@ -95,7 +94,7 @@ class anim(pygame.sprite.Sprite):
             self.current_time = 0
             self.index = 0
             self.sprite.image = self.images[self.index]
-        elif self.vy != 0 and self.current_time >= self.animation_time:
+        elif self.vy != 0 and self.on_ground == False and self.current_time >= self.animation_time:
             self.current_time = 0
             self.index = 0
             self.sprite.image = self.image_jump
@@ -110,7 +109,7 @@ class anim(pygame.sprite.Sprite):
         self.update_frame_dependent(dt)
 
     def check_collision(self):
-        global jump, move_decor, ap_r, ap_l, cote_r, cote_l, fond, sol, want_jump, falling
+        global jump, move_decor, ap_r, ap_l, cote_r, cote_l, fond, sol, want_jump, falling, time
 
         col_right = pygame.sprite.collide_mask(cote_r, self.sprite)
         col_left = pygame.sprite.collide_mask(cote_l, self.sprite)
@@ -138,14 +137,17 @@ class anim(pygame.sprite.Sprite):
             time = 0
             if want_jump == False:
                 self.vy = 0
+                self.on_ground = True
             self.sprite.rect.y = self.sprite.rect.y
 
         if col_sol == col_plat == col_left == col_right == None:
             falling = True
+            self.on_ground = False
         if col_left == None and ap_r == True:
             move_decor = -2
         if col_right == None and ap_l == True:
             move_decor = 2
+            
 images = load_images(path='temp')  # Make sure to provide the relative or full path to the images directory.
 player = anim(position=(640/2, 100), images=images)
 
@@ -167,6 +169,7 @@ while not done:
                 ap_l = True
             elif event.key == K_UP and jump == False and falling == False:
                 jump = True
+                player.on_ground = False
                 want_jump = True
                 player.vy = 2.5
 
@@ -178,7 +181,6 @@ while not done:
             if ap_l == ap_r == False:
                 player.vx = 0
                 move_decor = 0
-
 
     player.check_collision()
 

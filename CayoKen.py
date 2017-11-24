@@ -142,7 +142,10 @@ class anim(pygame.sprite.Sprite):
 
         if col_sol == col_plat == col_left == col_right == None:
             falling = True
-
+        if col_left == None and ap_r == True:
+            move_decor = -2
+        if col_right == None and ap_l == True:
+            move_decor = 2
 images = load_images(path='temp')  # Make sure to provide the relative or full path to the images directory.
 player = anim(position=(640/2, 100), images=images)
 

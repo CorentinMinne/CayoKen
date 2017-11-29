@@ -50,14 +50,14 @@ def load_images(path):
     files = sorted(files)
     for file_name in files:
         image = pygame.image.load(path + os.sep + file_name).convert_alpha()
-        image = pygame.transform.scale(image, (72, 72))
+        image = pygame.transform.scale(image, (43, 73))
         images.append(image)
     return images
 
 class anim(pygame.sprite.Sprite):
 
     def __init__(self, position, images):
-        size = (72, 72)  # This should match the size of the images.
+        size = (43, 73)  # This should match the size of the images.
         self.sprite = pygame.sprite.Sprite()
         self.sprite.rect = pygame.Rect(position, size)
 
@@ -65,7 +65,7 @@ class anim(pygame.sprite.Sprite):
         self.images_right = images
         self.images_left = [pygame.transform.flip(image, True, False) for image in images]  # Flipping every image.
         self.image_jump = pygame.image.load("jump.png").convert_alpha()
-        self.image_jump = pygame.transform.scale(self.image_jump, (72, 72))
+        self.image_jump = pygame.transform.scale(self.image_jump, (43, 73))
         self.image_jump_r = self.image_jump
         self.image_jump_l = pygame.transform.flip(self.image_jump, True, False)
         self.index = 0
